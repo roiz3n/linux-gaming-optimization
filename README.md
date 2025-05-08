@@ -106,7 +106,7 @@ TODO
 
 * [sched-ext](https://wiki.cachyos.org/configuration/sched-ext/)
 
-If unsure, `BORE` and `rusty` are both solid picks (`BORE` is used by default in CachyOS). But the best option will depend on your choice of game, your hardware, and whether you have anything else running while playing (e.g. recording software, Discord). Some schedulers may improve in performance in the future due to updates.
+If unsure, `BORE` and `bpfland` are both solid picks (`BORE` is used by default in CachyOS). But the best option will depend on your choice of game, your hardware, and whether you have anything else running while playing (e.g. recording software, Discord). Some schedulers may improve in performance in the future due to updates.
 
 If experiencing strange freezing or other performance issues, changing schedulers may be a good idea.
 
@@ -124,14 +124,12 @@ Ensure you disable desktop composition while gaming if using Xorg. The way to do
 
 Not a display server in itself, but a protocol implemented by various display servers (called "Wayland compositors"). Should offer a smoother experience than Xorg on NVIDIA due to explicit sync & a few Xorg-specific driver bugs (unless your compositor is super bloated). Also offers the potential for tear-free gaming with [relatively low latency](https://artemis.sh/2022/09/18/wayland-from-an-x-apologist.html), without the need for VRR. 
 
-If you want the lowest possible latency, you'll need to make sure that the compositor you choose has the capability to enable tearing in games (i.e. to disable Vsync), and has support for explicit sync (if on NVIDIA). Again though, just having these capabilities does not automatically make a compositor low-latency.
+If you want the lowest possible latency, you'll need to make sure that the compositor you choose has the capability to enable tearing in games (i.e. to disable Vsync). Again though, just having these capabilities does not automatically make a compositor low-latency.
 
-The only compositor I know of that lets you force tearing outside of fullscreen applications is [`labwc`](https://github.com/labwc/labwc), if that's something you care about. It currently does not support explicit sync, however, and somewhat comparable latency outside of fullscreen (within 2ms) can be achieved on [`sway`](https://swaywm.org/) with `max_render_time` and [`Hyprland`](https://hyprland.org/) with `render_ahead_of_time` (both of these compositors have explicit sync support). However, `Hyprland`'s implementation has inherent inconsistency due to being based around the expected time to render a frame (averaged over a period of one second), so keep that in mind.
-
-You may want to use a greeter such as [`ReGreet`](https://github.com/rharish101/ReGreet) that runs in Wayland rather than Xorg (I noticed SDDM leaves Xorg running in the background, not sure about others).
+The only compositor I know of that lets you force tearing outside of fullscreen applications is [`labwc`](https://github.com/labwc/labwc), if that's something you care about. Somewhat comparable latency outside of fullscreen (within a few milliseconds) can also be achieved on [`sway`](https://swaywm.org/) with `max_render_time` and [`Hyprland`](https://hyprland.org/) with `render_ahead_of_time`. However, `Hyprland`'s implementation has inherent inconsistency due to being based around the expected time to render a frame (averaged over a period of one second), so keep that in mind.
 
 Of potential interest: 
-- [`wlroots` environment variables](https://gitlab.freedesktop.org/wlroots/wlroots/-/blob/master/docs/env_vars.md) (especially `WLR_RENDERER`)
+- [`wlroots` environment variables](https://gitlab.freedesktop.org/wlroots/wlroots/-/blob/master/docs/env_vars.md) (especially `WLR_RENDERER`, which might improve performance if set to `vulkan` on some compositors)
 
 # 5. libinput
 
@@ -139,7 +137,7 @@ Of potential interest:
 
 To convert mouse sensitivity from a percentage (e.g. `25%`) into a libinput Accel Speed value (e.g. `-0.75`), simply subtract `1` from the percentage (e.g. `0.25 - 1 = -0.75`). Make sure you set your Accel Profile to `flat` as well (to disable acceleration).
 
-If you want to separate vertical and horizontal sensitivity (Xorg only), what you have to do is create a file in `/etc/X11/xorg.conf.d/` called something like `50-mouse-sensitivity.conf`, with the following content:
+However, if you want to separate vertical and horizontal sensitivity (Xorg only), what you have to do is create a file in `/etc/X11/xorg.conf.d/` called something like `50-mouse-sensitivity.conf`, with the following content:
 
 ```
 Section "InputClass"
@@ -246,6 +244,8 @@ If on an AMD or Intel GPU, consider [`static-wine32`](https://github.com/MIvanch
 
 [`wine-osu`](https://gist.github.com/NelloKudo/b6f6d48807548bd3cacd3018a1cadef5) provides low-latency audio and various other patches that may potentially improve performance.
 
+[`wine-tkg`](https://github.com/Frogging-Family/wine-tkg-git) allows making a custom build of Wine with various patches (including low latency audio, patches from Proton, etc.).
+
 # 13. Miscellaneous
 
 * [`gpu-screen-recorder`](https://git.dec05eba.com/gpu-screen-recorder/about/) is by far the best recording/clipping/streaming tool for Linux if you don't need too many features. If you need the functionality offered by OBS instead, consider using [`obs-vkcapture`](https://github.com/nowrep/obs-vkcapture), and potentially [`obs-vaapi`](https://github.com/fzwoch/obs-vaapi) if on an Intel or AMD GPU.
@@ -253,8 +253,6 @@ If on an AMD or Intel GPU, consider [`static-wine32`](https://github.com/MIvanch
 * [Don't use `irqbalance`](http://www.alexonlinux.com/why-interrupt-affinity-with-multiple-cores-is-not-such-a-good-thing). Manually setting IRQ affinities is also typically not necessary on Linux either; the kernel does a good job on its own.
 
 * Use [`evhz`](https://git.sr.ht/~iank/evhz) or [`MouseTester`](https://github.com/valleyofdoom/MouseTester) (through Wine) to ensure that your mouse is polling at the correct rate. For `MouseTester`, you may have to hover your cursor over the data plot window to get accurate results.
-
-* Add custom rules for your games if using [`ananicy-cpp`](https://gitlab.com/ananicy-cpp/ananicy-cpp) (enabled by default in CachyOS). Make sure to use `ananicy-cpp` rather than `ananicy`. Also, don't use `ananicy-cpp` in combination with `gamemode`.
 
 * Choose a good cursor theme, I like [Windows Classic Dark](https://www.pling.com/p/2060588/).
 
