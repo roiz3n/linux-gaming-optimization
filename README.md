@@ -3,9 +3,6 @@
 > [!WARNING]
 > This guide is a fork of original guide by [syzzi (theyareonit)](https://github.com/theyareonit)
 
-> [!WARNING]
-> This guide is unfinished, and may never be finished.
-
 This is not a step-by-step instruction manual but rather a collection of resources and things to consider when tuning Linux systems for low-latency, low-jitter gaming.
 
 This guide is targeted toward more experienced users, due to the fact that many settings listed here cannot be blindly applied, and require some understanding of what is going on. That said, I don't claim to be an authority on this subject either, and some information here may be incorrect or misleading.
