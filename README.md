@@ -1,6 +1,9 @@
 # Low-latency Linux gaming
 
 > [!WARNING]
+> This guide is a fork of original guide by [syzzi(theyareonit)](https://github.com/theyareonit)
+
+> [!WARNING]
 > This guide is unfinished, and may never be finished.
 
 This is not a step-by-step instruction manual but rather a collection of resources and things to consider when tuning Linux systems for low-latency, low-jitter gaming.
