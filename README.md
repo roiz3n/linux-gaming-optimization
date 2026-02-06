@@ -129,24 +129,83 @@ There is no universally “best” scheduler for gaming. Results depend heavily 
 
 # 4. Display servers, compositors, & window managers
 
-Obviously, a less bloated system is going to run better than a bloated system, so you'll probably want to avoid any DE/WM that runs an excessive number of operations in the background. But even "light" WMs can still have performance bugs, and the size on disk/RAM usage of a WM does not necessarily tell you how it actually performs.
+On Linux, gaming mostly comes down to **X11 vs Wayland**, and which compositor or window manager sits on top of it. There is no single “correct” choice — only trade-offs.
 
-## Xorg
+## X11
 
-The most popular implementation of the X11 display protocol. The more mature and better-supported option compared to Wayland. Xorg may also make it easier to configure GPU and input related settings, depending on your setup and needs.
+X11 is the traditional display server and is still widely used for gaming.
 
-Ensure you disable desktop composition while gaming if using Xorg. The way to do this will depend on your choice of compositor/DE. I personally don't use desktop composition anywhere, because the latency bothers me more than the tearing even on the desktop, but it's up to you.
+**Pros:**
+- Predictable behavior
+- Mature driver support
+- Easy access to tearing and low-latency paths
+- Fewer compositor-specific quirks
+
+**Cons:**
+- Aging architecture
+- Worse isolation and security
+- Generally worse handling of modern features like HDR and per-surface synchronization
+
+If something works on X11 but not on Wayland, it’s completely reasonable to keep using X11.
+
+---
 
 ## Wayland
 
-Not a display server in itself, but a protocol implemented by various display servers (called "Wayland compositors"). Should offer a smoother experience than Xorg on NVIDIA due to explicit sync & a few Xorg-specific driver bugs (unless your compositor is super bloated). Also offers the potential for tear-free gaming with [relatively low latency](https://artemis.sh/2022/09/18/wayland-from-an-x-apologist.html), without the need for VRR. 
+Wayland is the modern replacement for X11 and is now usable for gaming, but behavior depends heavily on the compositor and GPU driver.
 
-If you want the lowest possible latency, you'll need to make sure that the compositor you choose has the capability to enable tearing in games (i.e. to disable Vsync). Again though, just having these capabilities does not automatically make a compositor low-latency.
+**Pros:**
+- Better frame pacing and synchronization in many cases
+- Cleaner input handling
+- Improved VRR and multi-monitor behavior on supported setups
+- Actively developed
 
-The only compositor I know of that lets you force tearing outside of fullscreen applications is [`labwc`](https://github.com/labwc/labwc), if that's something you care about. Somewhat comparable latency outside of fullscreen (within a few milliseconds) can also be achieved on [`sway`](https://swaywm.org/) with `max_render_time` and [`Hyprland`](https://hyprland.org/) with `render_ahead_of_time`. However, `Hyprland`'s implementation has inherent inconsistency due to being based around the expected time to render a frame (averaged over a period of one second), so keep that in mind.
+**Cons:**
+- Tearing control is compositor-dependent
+- Some features are still inconsistent across compositors
+- Driver quality (especially proprietary ones) matters a lot
 
-Of potential interest: 
-- [`wlroots` environment variables](https://gitlab.freedesktop.org/wlroots/wlroots/-/blob/master/docs/env_vars.md) (especially `WLR_RENDERER`, which might improve performance if set to `vulkan` on some compositors)
+Wayland is no longer “experimental”, but it is also not universally better for every game or setup.
+
+---
+
+## Tearing and latency on Wayland
+
+Wayland is designed around synchronized presentation (no tearing by default). A standardized tearing protocol exists, allowing applications to *request* tearing for lower latency, but the compositor ultimately decides whether to honor it.
+
+In practice:
+- Tearing is usually only allowed for fullscreen games
+- Some compositors expose explicit tearing or latency options
+- Behavior varies significantly between compositors
+
+If tearing is critical for you and Wayland does not behave as expected, X11 remains a valid fallback.
+
+---
+
+### Compositors and window managers
+
+The compositor often matters more than the display server itself.
+
+- **Minimal or lightweight compositors / WMs**  
+  (e.g. tiling Wayland compositors or bare X11 window managers)  
+  → Less overhead, fewer surprises, usually preferred for competitive or latency-sensitive gaming.
+
+- **Feature-rich desktop environments**  
+  (e.g. full compositing, effects, animations)  
+  → More convenient, but can introduce latency, frame pacing issues, or compositor-specific bugs.
+
+Disabling unnecessary effects, animations, and background services often matters more than switching display servers.
+
+---
+
+### Practical advice
+
+- If your games run well on your current setup, don’t change it just because something is “newer”.
+- Test Wayland and X11 yourself — behavior can differ per GPU, driver version, and compositor.
+- Avoid stacking tweaks blindly; change one thing at a time and measure results.
+- When in doubt, stability beats theoretical performance gains.
+
+Linux gaming is about choosing the least problematic option *for your hardware and games*, not following a single “best” setup.
 
 # 5. libinput
 
