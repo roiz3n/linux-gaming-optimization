@@ -1,12 +1,14 @@
-# Low-latency Linux gaming
+> [!WARNING]
+> This guide is unfinished, and may never be finished.
 
-THIS GUIDE IS UNFINISHED, AND MAY NEVER BE FINISHED.
+# Low-latency Linux gaming
 
 This is not a step-by-step instruction manual but rather a collection of resources and things to consider when tuning Linux systems for low-latency, low-jitter gaming.
 
 This guide is targeted toward more experienced users, due to the fact that many settings listed here cannot be blindly applied, and require some understanding of what is going on. That said, I don't claim to be an authority on this subject either, and some information here may be incorrect or misleading.
 
-Before reading this guide, please go through [PC-Tuning](https://github.com/valleyofdoom/PC-Tuning) to learn how to properly configure your hardware and UEFI/BIOS settings (you can ignore the Windows-specific steps).
+> [!WARNING]
+> Before reading this guide, please go through [PC-Tuning](https://github.com/valleyofdoom/PC-Tuning) to learn how to properly configure your hardware and UEFI/BIOS settings (you can ignore the Windows-specific steps).
 
 # Sections
 
@@ -98,7 +100,23 @@ Use [`i7z`](https://code.google.com/archive/p/i7z/) to verify that your processo
 
 ## AMD CPUs
 
-TODO
+Modern AMD CPUs (Zen 2 and newer) generally behave well out of the box, but some tuning can reduce latency variance under sustained gaming load.
+
+AMD systems usually do not benefit from as aggressive power-state disabling as Intel systems. Over-disabling power management may actually *increase* frame-time inconsistency, especially on Zen 3+.
+
+Useful kernel parameters:
+
+| Parameter | Explanation |
+| --- | --- |
+| `amd_pstate=active` | Forces the modern amd_pstate driver into active mode, allowing the kernel to directly request frequencies instead of relying on ACPI hints. Recommended on Zen 3+ (Ryzen 5000 and newer). |
+| `processor.max_cstate=0` | Prevents entry into deep C-states. Can reduce jitter at the cost of idle power usage. Disable C-States in UEFI as well. |
+| `idle=poll` | Same caveats as on Intel. Rarely beneficial on modern AMD CPUs unless SMT is disabled and the system is heavily latency-bound. |
+| `rcu_nocbs=all` | Offloads RCU callbacks from all CPUs, which can reduce jitter on busy cores when combined with `nohz_full`. |
+| `pci=noaer` | Disables PCIe Advanced Error Reporting interrupts, which can cause rare but noticeable stutters on some AMD platforms. |
+
+Notes:
+- SMT should generally remain enabled unless threads are manually pinned.
+- Disabling boost clocks is usually counterproductive on Zen 4+ CPUs.
 
 # 3. Schedulers
 
@@ -216,23 +234,87 @@ Disable `Dithering` within the `Controls` section for your display.
 
 # 7. AMD GPUs
 
-TODO
+AMD GPUs work well on Linux due to the open AMDGPU kernel driver and Mesa userspace stack.
 
-# 8. Intel GPUs
+General recommendations:
+- Prefer the RADV Vulkan driver over AMDVLK
+- Use a recent Mesa version (24.3+, preferably 25.x)
+- Avoid aggressive power saving while gaming
 
-TODO
+Useful environment variables:
+- `RADV_PERFTEST=nggc,sam` (enables NGGC and SAM support)
+- `MESA_VK_WSI_PRESENT_MODE=immediate` (disables implicit FIFO present mode where supported)
 
-# 9. Audio
+Notes:
+- `nggc` enables Next-Gen Geometry Compiler (default on RDNA2+)
+- `sam` enables Smart Access Memory / Resizable BAR support
+- `immediate` disables implicit FIFO present mode where supported
 
-TODO
+For lowest latency, dynamic clock ramping can be avoided:
+- Lock GPU clocks near boost using tools like corectrl
+- Alternatively set `/sys/class/drm/card*/device/power_dpm_force_performance_level` to `high` or `manual`
 
-# 10. File systems & storage
+On Xorg, disable compositors while gaming.  
+On Wayland, use a compositor that supports explicit tearing for fullscreen applications.
 
-TODO
+## 8. Intel GPUs
 
-# 11. Networking
+Intel GPU gaming performance has improved significantly on Xe-LP and Xe-HPG (Arc), but latency tuning options are more limited compared to AMD or NVIDIA.
 
-TODO
+Recommended kernel parameters if latency variance is observed:
+
+| Parameter | Explanation |
+| --- | --- |
+| `i915.enable_psr=0` | Disables Panel Self Refresh, which can cause frame pacing issues on some systems. |
+| `i915.enable_dc=0` | Disables deep display power states, reducing wake-up latency. |
+| `i915.enable_fbc=0` | Disables Frame Buffer Compression, which may introduce latency variance. |
+
+Notes:
+- Prefer Vulkan over OpenGL when possible
+- Static clocks can help on Intel Arc GPUs
+- Avoid outdated i915 tuning guides written before 2022
+
+## 9. Audio
+
+Low-latency audio mainly matters for rhythm games and competitive FPS titles.
+
+PipeWire is recommended over PulseAudio or JACK directly.
+
+General PipeWire recommendations:
+- Sample rate: 48000 Hz
+- Quantum: 32–64 frames
+- Disable suspend-on-idle for active audio devices
+
+Low-latency audio does not require a real-time kernel.  
+Ensure `threadirqs` is enabled and avoid USB autosuspend on audio devices if popping or dropouts occur.
+
+## 10. File systems & storage
+
+Storage performance mainly affects load times, but poor configuration can introduce stutter.
+
+File systems:
+- ext4 is the safest low-latency default
+- XFS performs well for large sequential reads
+- btrfs is not recommended unless carefully tuned
+
+Recommended ext4 mount options:
+- `noatime`
+- avoid disabling barriers
+
+NVMe notes:
+- Ensure adequate cooling to prevent thermal throttling
+- Disable ASPM in firmware if supported
+
+## 11. Networking
+
+Relevant primarily for online competitive games.
+
+General recommendations:
+- Prefer wired Ethernet over Wi-Fi
+- Disable power saving on network adapters
+- Avoid VPNs unless required
+
+Optional sysctl tuning can help under heavy packet load but will not compensate for poor routing or ISP issues.
 
 # 12. Wine
 
