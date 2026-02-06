@@ -109,8 +109,6 @@ Useful kernel parameters:
 | Parameter | Explanation |
 | --- | --- |
 | `amd_pstate=active` | Forces the modern amd_pstate driver into active mode, allowing the kernel to directly request frequencies instead of relying on ACPI hints. Recommended on Zen 3+ (Ryzen 5000 and newer). |
-| `processor.max_cstate=0` | Prevents entry into deep C-states. Can reduce jitter at the cost of idle power usage. Disable C-States in UEFI as well. |
-| `idle=poll` | Same caveats as on Intel. Rarely beneficial on modern AMD CPUs unless SMT is disabled and the system is heavily latency-bound. |
 | `rcu_nocbs=all` | Offloads RCU callbacks from all CPUs, which can reduce jitter on busy cores when combined with `nohz_full`. |
 | `pci=noaer` | Disables PCIe Advanced Error Reporting interrupts, which can cause rare but noticeable stutters on some AMD platforms. |
 
