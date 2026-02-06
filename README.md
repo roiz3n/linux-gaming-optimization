@@ -122,9 +122,10 @@ Notes:
 
 * [sched-ext](https://wiki.cachyos.org/configuration/sched-ext/)
 
-If unsure, `BORE` and `bpfland` are both solid picks (`BORE` is used by default in CachyOS). But the best option will depend on your choice of game, your hardware, and whether you have anything else running while playing (e.g. recording software, Discord). Some schedulers may improve in performance in the future due to updates.
+If you’re unsure, stick to your distro’s default kernel and scheduler first.  
+CachyOS ships multiple kernel variants — including BORE-based ones such as `linux-cachyos-bore` — as well as support for `sched-ext` (SCX) schedulers that can be loaded at runtime via `scx_loader` / `scxctl` and `scx-scheds`.
 
-If experiencing strange freezing or other performance issues, changing schedulers may be a good idea.
+There is no universally “best” scheduler for gaming. Results depend heavily on the game, CPU, background load (recording, browsers, Discord), and even frame pacing sensitivity. If you experiment, change one thing at a time and benchmark properly.
 
 # 4. Display servers, compositors, & window managers
 
@@ -208,52 +209,19 @@ You may additionally want to force all keyboards to use evdev with `MatchIsKeybo
 
 # 6. NVIDIA GPUs
 
-This section is written with Xorg & the proprietary NVIDIA drivers in mind, but much of this applies on Wayland too.
-
-* [OpenGL environment variables](https://download.nvidia.com/XFree86/Linux-x86_64/560.35.03/README/openglenvvariables.html): Of particular interest is the section on `__GL_YIELD`. It's also worth looking into `__GL_MaxFramesAllowed`, but I can't find any official documentation for it.
-
-* [Kernel Module Parameters](https://wiki.gentoo.org/wiki/NVIDIA/nvidia-drivers#Kernel_module_parameters): Notable are `NVreg_InitializeSystemMemoryAllocations` and `NVreg_UsePageAttributeTable`, though CachyOS already sets these on its own.
-
-* [Tips and tricks](https://wiki.archlinux.org/title/NVIDIA/Tips_and_tricks): Of particular interest are the sections on overclocking, setting static clocks, configuring fan speed on login, and the `nvidia_drm.modeset` kernel parameter (which CachyOS also sets on its own).
-
-* [Custom EDID](https://nvidia.custhelp.com/app/answers/detail/a_id/3571/~/managing-a-display-edid-on-linux): CRU works fine through Wine as long as you export the EDID and load it this way.
-
-* [Lower voltage](https://github.com/NVIDIA/open-gpu-kernel-modules/discussions/236#discussioncomment-3553564): Scuffed, but should work on all cards.
-
-* [Raise voltage](https://www.phoronix.com/news/MTg0MDI): Not sure if this works on newer cards.
-
-## nvidia-settings
-
-The settings you configure with `nvidia-settings` sometimes aren't automatically loaded by the system on startup. Make sure to run [`nvidia-settings --load-config-only`](https://forums.developer.nvidia.com/t/nvidia-settings-load-config-only-not-working/142614/5) at some point after starting your display server.
-
-Ensure `Sync to VBlank`, `Force Composition Pipeline`, and `Force Full Composition Pipeline` are disabled.
-
-Disable `Dithering` within the `Controls` section for your display.
+On NVIDIA, smooth Wayland gaming often depends on explicit sync support across the entire stack (driver, compositor, and sometimes Xwayland). Support has improved significantly, but driver regressions and compositor-specific quirks still happen, so results may differ between setups.
 
 # 7. AMD GPUs
 
-AMD GPUs work well on Linux due to the open AMDGPU kernel driver and Mesa userspace stack.
+### Environment variables
 
-General recommendations:
-- Prefer the RADV Vulkan driver over AMDVLK
-- Use a recent Mesa version (24.3+, preferably 25.x)
-- Avoid aggressive power saving while gaming
+> **Note:** Most Mesa environment variables are intended for debugging or experimentation.  
+> On modern Mesa/RADV setups, performance is usually best without forcing anything. Some variables may help specific games, while others can make things worse.
 
-Useful environment variables:
-- `RADV_PERFTEST=nggc,sam` — enables NGGC and SAM support
-- `MESA_VK_WSI_PRESENT_MODE=immediate` — disables implicit FIFO present mode where supported
+- `RADV_PERFTEST=nggc,sam` — enables experimental RADV paths; can help in some cases but is often unnecessary on newer GPUs and Mesa versions
+- `MESA_VK_WSI_PRESENT_MODE=immediate` — requests immediate presentation; may reduce latency, but can be ignored by DXVK or vkd3d-proton
 
-Notes:
-- `nggc` enables Next-Gen Geometry Compiler (default on RDNA2+)
-- `sam` enables Smart Access Memory / Resizable BAR support
-- `immediate` requests immediate presentation instead of FIFO
-
-For lowest latency, dynamic clock ramping can be avoided:
-- Lock GPU clocks near boost using tools like corectrl
-- Alternatively set `/sys/class/drm/card*/device/power_dpm_force_performance_level` to `high` or `manual`
-
-On Xorg, disable compositors while gaming.  
-On Wayland, use a compositor that supports explicit tearing for fullscreen applications.
+Keep in mind that DXVK and vkd3d-proton may override presentation behavior, so this variable is not always respected.
 
 ## 8. Intel GPUs
 
@@ -315,15 +283,9 @@ Optional sysctl tuning can help under heavy packet load but will not compensate 
 
 # 12. Wine
 
-Enable Wine's [native Wayland driver](https://wiki.archlinux.org/title/Wine#Wayland) if on Wayland.
+As of January 2026, Wine 11.0 is available. The native Wayland driver has matured a lot, but real-world performance still depends on the game, toolkit, GPU driver, and compositor.
 
-If running Direct3D games with Wine through the command line or a script, ensure you're using [`dxvk`](https://github.com/doitsujin/dxvk). Also, consider using the environment variable `WINEDEBUG=-all` to marginally reduce overhead.
-
-If on an AMD or Intel GPU, consider [`static-wine32`](https://github.com/MIvanchev/static-wine32) to take advantage of LTO for 32-bit Windows games.
-
-[`wine-osu`](https://gist.github.com/NelloKudo/b6f6d48807548bd3cacd3018a1cadef5) provides low-latency audio and various other patches that may potentially improve performance.
-
-[`wine-tkg`](https://github.com/Frogging-Family/wine-tkg-git) allows making a custom build of Wine with various patches (including low latency audio, patches from Proton, etc.).
+If native Wayland causes issues on your setup, Xwayland remains a perfectly valid fallback.
 
 # 13. Miscellaneous
 
