@@ -1,7 +1,7 @@
 # Low-latency Linux gaming
 
 > [!WARNING]
-> This guide is a fork of original guide by [syzzi(theyareonit)](https://github.com/theyareonit)
+> This guide is a fork of original guide by [syzzi (theyareonit)](https://github.com/theyareonit)
 
 > [!WARNING]
 > This guide is unfinished, and may never be finished.
