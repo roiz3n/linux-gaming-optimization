@@ -242,13 +242,13 @@ General recommendations:
 - Avoid aggressive power saving while gaming
 
 Useful environment variables:
-- `RADV_PERFTEST=nggc,sam` (enables NGGC and SAM support)
-- `MESA_VK_WSI_PRESENT_MODE=immediate` (disables implicit FIFO present mode where supported)
+- `RADV_PERFTEST=nggc,sam` — enables NGGC and SAM support
+- `MESA_VK_WSI_PRESENT_MODE=immediate` — disables implicit FIFO present mode where supported
 
 Notes:
 - `nggc` enables Next-Gen Geometry Compiler (default on RDNA2+)
 - `sam` enables Smart Access Memory / Resizable BAR support
-- `immediate` disables implicit FIFO present mode where supported
+- `immediate` requests immediate presentation instead of FIFO
 
 For lowest latency, dynamic clock ramping can be avoided:
 - Lock GPU clocks near boost using tools like corectrl
@@ -298,8 +298,7 @@ File systems:
 - btrfs is not recommended unless carefully tuned
 
 Recommended ext4 mount options:
-- `noatime`
-- avoid disabling barriers
+- `noatime` — do **NOT** disable write barriers (`barrier=0` / `nobarrier`)
 
 NVMe notes:
 - Ensure adequate cooling to prevent thermal throttling
