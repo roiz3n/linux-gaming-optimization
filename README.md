@@ -85,11 +85,11 @@ And similarly to the issue I personally experienced, the impression I get is tha
 | `threadirqs` | [Thread interrupt handlers](https://wiki.linuxfoundation.org/realtime/documentation/technical_details/threadirq) by default. |
 | `tsc=reliable` | Disable clocksource verification for TSC, which may slightly reduce overhead. Not recommended due to the potential for [clock desync](https://lwn.net/Articles/388188/). |
 | `preempt=full` | Allow preemption of [almost all](https://wiki.linuxfoundation.org/realtime/documentation/technical_basics/preemption_models) kernel code. |
-| `nohz_full=all` | Use tickless mode on all cores wherever possible (specifically, when there is at most one runnable task on a core). Alternatively, you can replace `all` with a range or comma-separated list of cores to make tickless, e.g. `2-5,7,8`. This is [not necessarily beneficial](https://www.kernel.org/doc/Documentation/timers/NO_HZ.txt). In addition, [`isolcpus`](https://access.redhat.com/solutions/480473) can be used to force a specific task to always run tickless. |
+| `nohz_full=all` | Use tickless mode on all cores wherever possible (specifically, when there is at most one runnable task on a core). Alternatively, you can replace `all` with a range or comma-separated list of cores to make tickless, e.g. `2-5,7,8`. This is [not necessarily beneficial](https://www.kernel.org/doc/Documentation/timers/NO_HZ.txt). In addition, [`isolcpus`](https://access.redhat.com/solutions/480473) can be used to force a specific task to always run tickless. Using these parameters without explicit CPU and IRQ pinning can lead to worse latency and frametimes. Intended for carefully tuned real-time systems, not general desktop gaming. |
 | `cpufreq.default_governor=performance` | Set the default [frequency scaling governor](https://wiki.archlinux.org/title/CPU_frequency_scaling#Scaling_governors) to `performance`. |
 | `pcie_aspm=off` | Force [ASPM](https://en.wikipedia.org/wiki/Active_State_Power_Management) off for all PCIE devices. Make sure to disable ASPM in UEFI/BIOS settings as well. |
 | `processor.max_cstate=0` | Don't allow processor to sleep deeper than the C1 state. This will prevent your CPU from reaching its maximum single-core boost clock (if running stock frequencies), but reduces jitter substantially. This will increase idle power usage. Make sure to disable C-States in UEFI/BIOS settings as well. |
-| `idle=poll` | Force CPU into the C0 state (significantly increasing idle power usage). Don't use if you have hyperthreading/SMT enabled. Also, [Linux kernel documentation](https://www.kernel.org/doc/Documentation/x86/x86_64/boot-options.txt) says that this parameter provides no performance advantage on CPUs with MWAIT support, which is all modern x86 CPUs. However, the aforementioned Intel latency tuning guide (which was updated in 2017) still recommends this parameter, so I'm not sure what to make of this one. RHEL's latency tuning guide also recommends using this parameter. |
+| `idle=poll` | Force CPU into the C0 state (significantly increasing idle power usage). Don’t use if you have hyperthreading/SMT enabled. According to the [Linux kernel documentation](https://www.kernel.org/doc/Documentation/x86/x86_64/boot-options.txt), this parameter provides no performance advantage on CPUs with MWAIT support, which includes all modern x86 CPUs. Despite this, older Intel and RHEL latency tuning guides still recommend it, which makes its real-world usefulness questionable. On modern CPUs, it usually provides no measurable benefit and often increases power consumption and heat while reducing boost headroom. Not recommended unless you are experimenting with very specific real-time workloads. |
 
 ## Intel CPUs
 
@@ -271,7 +271,13 @@ You may additionally want to force all keyboards to use evdev with `MatchIsKeybo
 
 # 6. NVIDIA GPUs
 
-On NVIDIA, smooth Wayland gaming often depends on explicit sync support across the entire stack (driver, compositor, and sometimes Xwayland). Support has improved significantly, but driver regressions and compositor-specific quirks still happen, so results may differ between setups.
+NVIDIA GPUs generally work well on Linux, but behavior depends heavily on driver version, display server, and compositor.
+
+On Wayland, acceptable results usually require explicit sync support. In practice, this means using a recent NVIDIA driver (555+), a recent Xwayland version (24.1+), and up-to-date wayland-protocols. Without explicit sync, issues such as flickering, stuttering, or unstable frametimes are common.
+
+If you encounter rendering or latency issues on Wayland, switching to X11 or forcing Xwayland is a valid and often simpler solution. There is no inherent performance penalty for doing so.
+
+On X11, NVIDIA tends to be more predictable and stable, especially on older GPUs or older driver versions. For users who prioritize stability over experimentation, X11 remains a safe choice.
 
 # 7. AMD GPUs
 
@@ -323,7 +329,7 @@ Storage performance mainly affects load times, but poor configuration can introd
 File systems:
 - ext4 is the safest low-latency default
 - XFS performs well for large sequential reads
-- btrfs is not recommended unless carefully tuned
+- btrfs is not recommended unless carefully configured
 
 Recommended ext4 mount options:
 - `noatime` — do **NOT** disable write barriers (`barrier=0` / `nobarrier`)
@@ -343,9 +349,11 @@ General recommendations:
 
 Optional sysctl tuning can help under heavy packet load but will not compensate for poor routing or ISP issues.
 
+Most networking sysctl tweaks do not reduce latency to game servers. They are mainly useful for handling high throughput or heavy background traffic.
+
 # 12. Wine
 
-As of January 2026, Wine 11.0 is available. The native Wayland driver has matured a lot, but real-world performance still depends on the game, toolkit, GPU driver, and compositor.
+As of January 2026, Wine 11.0 is available (released on January 13, 2026). The native Wayland driver has matured a lot, but real-world performance still depends on the game, toolkit, GPU driver, and compositor.
 
 If native Wayland causes issues on your setup, Xwayland remains a perfectly valid fallback.
 
