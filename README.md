@@ -338,7 +338,7 @@ NVMe notes:
 - Ensure adequate cooling to prevent thermal throttling
 - Disable ASPM in firmware if supported
 
-## Networking
+## 11. Networking
 
 Network sysctl tweaks rarely shorten ping to game servers.
 
