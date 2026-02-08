@@ -273,11 +273,11 @@ You may additionally want to force all keyboards to use evdev with `MatchIsKeybo
 
 NVIDIA GPUs generally work well on Linux, but behavior depends heavily on driver version, display server, and compositor.
 
-On Wayland, acceptable results usually require explicit sync support. In practice, this means using a recent NVIDIA driver (555+), a recent Xwayland version (24.1+), and up-to-date wayland-protocols. Without explicit sync, issues such as flickering, stuttering, or unstable frametimes are common.
+- On Wayland, acceptable results usually require explicit sync support. In practice, this means using a recent NVIDIA driver (555+), a recent Xwayland version (24.1+), and up-to-date wayland-protocols. Without explicit sync, issues such as flickering, stuttering, or unstable frametimes are common.
 
-If you encounter rendering or latency issues on Wayland, switching to X11 or forcing Xwayland is a valid and often simpler solution. There is no inherent performance penalty for doing so.
+- If you encounter rendering or latency issues on Wayland, switching to X11 or forcing Xwayland is a valid and often simpler solution. There is no inherent performance penalty for doing so.
 
-On X11, NVIDIA tends to be more predictable and stable, especially on older GPUs or older driver versions. For users who prioritize stability over experimentation, X11 remains a safe choice.
+- On X11, NVIDIA tends to be more predictable and stable, especially on older GPUs or older driver versions. For users who prioritize stability over experimentation, X11 remains a safe choice.
 
 # 7. AMD GPUs
 
@@ -338,16 +338,15 @@ NVMe notes:
 - Ensure adequate cooling to prevent thermal throttling
 - Disable ASPM in firmware if supported
 
-## 11. Networking
+## Networking
 
-Relevant primarily for online competitive games.
+Network sysctl tweaks rarely shorten ping to game servers.
 
-General recommendations:
-- Prefer wired Ethernet over Wi-Fi
-- Disable power saving on network adapters
-- Avoid VPNs unless required
+They can help with:
+- bufferbloat
+- heavy background traffic
 
-Optional sysctl tuning can help under heavy packet load but will not compensate for poor routing or ISP issues.
+But routing, physical distance to the server, and ISP peering matter far more than local sysctl tweaks.
 
 Most networking sysctl tweaks do not reduce latency to game servers. They are mainly useful for handling high throughput or heavy background traffic.
 
