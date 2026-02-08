@@ -291,7 +291,7 @@ NVIDIA GPUs generally work well on Linux, but behavior depends heavily on driver
 
 Keep in mind that DXVK and vkd3d-proton may override presentation behavior, so this variable is not always respected.
 
-## 8. Intel GPUs
+# 8. Intel GPUs
 
 Intel GPU gaming performance has improved significantly on Xe-LP and Xe-HPG (Arc), but latency tuning options are more limited compared to AMD or NVIDIA.
 
@@ -308,7 +308,7 @@ Notes:
 - Static clocks can help on Intel Arc GPUs
 - Avoid outdated i915 tuning guides written before 2022
 
-## 9. Audio
+# 9. Audio
 
 Low-latency audio mainly matters for rhythm games and competitive FPS titles.
 
@@ -322,7 +322,7 @@ General PipeWire recommendations:
 Low-latency audio does not require a real-time kernel.  
 Ensure `threadirqs` is enabled and avoid USB autosuspend on audio devices if popping or dropouts occur.
 
-## 10. File systems & storage
+# 10. File systems & storage
 
 Storage performance mainly affects load times, but poor configuration can introduce stutter.
 
@@ -338,7 +338,7 @@ NVMe notes:
 - Ensure adequate cooling to prevent thermal throttling
 - Disable ASPM in firmware if supported
 
-## 11. Networking
+# 11. Networking
 
 Network sysctl tweaks rarely shorten ping to game servers.
 
